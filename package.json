@@ -12,9 +12,21 @@
     "@types/node": "20.4.1",
     "@types/react": "18.2.14",
     "@types/react-dom": "18.2.6",
+    "copy-files-from-to": "^3.9.0",
+    "copy-webpack-plugin": "^11.0.0",
     "next": "13.4.9",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "typescript": "5.1.6"
-  }
+    "scichart": "^3.1.348",
+    "typescript": "5.1.6",
+    "webpack": "^5.88.1",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  },
+  "copyFiles": [
+    {
+      "from": "node_modules/scichart/_wasm/scichart2d.data",
+      "to": "public/scichart2d.data"
+    }
+  ]
 }
