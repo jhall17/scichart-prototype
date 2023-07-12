@@ -13,6 +13,39 @@ import {
   IFastLineRenderableSeriesOptions,
   XyDataSeries,
   FastLineRenderableSeries,
+  IBoxAnnotationOptions,
+  ILineAnnotationOptions,
+  IHVLineAnnotationOptions,
+  ITextAnnotationOptions,
+  INativeTextAnnotationOptions,
+  ICustomAnnotationOptions,
+  IAxisMarkerAnnotationOptions,
+  BoxAnnotation,
+  LineAnnotation,
+  HorizontalLineAnnotation,
+  VerticalLineAnnotation,
+  TextAnnotation,
+  NativeTextAnnotation,
+  CustomAnnotation,
+  AxisMarkerAnnotation,
+  IZoomPanModifierOptions,
+  IMouseWheelZoomModifierOptions,
+  IXAxisDragModifierOptions,
+  IYAxisDragModifierOptions,
+  IRubberBandXyZoomModifierOptions,
+  IZoomExtentsModifierOptions,
+  IRolloverModifierOptions,
+  ICursorModifierOptions,
+  ILegendModifierOptions,
+  ZoomPanModifier,
+  MouseWheelZoomModifier,
+  XAxisDragModifier,
+  YAxisDragModifier,
+  RubberBandXyZoomModifier,
+  ZoomExtentsModifier,
+  RolloverModifier,
+  CursorModifier,
+  LegendModifier,
 } from "scichart";
 
 // TODO: test - if we add to the builder, then rerender, does bob cleanup? e.g. add axis
@@ -34,37 +67,110 @@ export type AxisOptions =
   | ICategoryAxisOptions
   | ILogarithmicAxisOptions;
 
+const AxisMap = {
+  [AxisType.Numeric]: NumericAxis,
+  [AxisType.DateTimeNumeric]: DateTimeNumericAxis,
+  [AxisType.Category]: CategoryAxis,
+  [AxisType.LogarithmicAxis]: LogarithmicAxis,
+};
+
+export enum AnnotationType {
+  Box,
+  Line,
+  HorizontalLine,
+  VerticalLine,
+  Text,
+  NativeText,
+  Custom,
+  AxisMarker,
+}
+
+export type AnnotationOptions =
+  | IBoxAnnotationOptions
+  | ILineAnnotationOptions
+  | IHVLineAnnotationOptions
+  | ITextAnnotationOptions
+  | INativeTextAnnotationOptions
+  | ICustomAnnotationOptions
+  | IAxisMarkerAnnotationOptions;
+
+const AnnotationMap = {
+  [AnnotationType.Box]: BoxAnnotation,
+  [AnnotationType.Line]: LineAnnotation,
+  [AnnotationType.HorizontalLine]: HorizontalLineAnnotation,
+  [AnnotationType.VerticalLine]: VerticalLineAnnotation,
+  [AnnotationType.Text]: TextAnnotation,
+  [AnnotationType.NativeText]: NativeTextAnnotation,
+  [AnnotationType.Custom]: CustomAnnotation,
+  [AnnotationType.AxisMarker]: AxisMarkerAnnotation,
+};
+
+export enum ZoomPanModifierType {
+  ZoomPan,
+  MouseWheelZoomPan,
+  XAxisDrag,
+  YAxisDrag,
+  RubberBandXyZoom,
+  ZoomExtents,
+}
+
+export type ZoomPanModifierOptions =
+  | IZoomPanModifierOptions
+  | IMouseWheelZoomModifierOptions
+  | IXAxisDragModifierOptions
+  | IYAxisDragModifierOptions
+  | IRubberBandXyZoomModifierOptions
+  | IZoomExtentsModifierOptions;
+
+const ZoomPanModifierMap = {
+  [ZoomPanModifierType.ZoomPan]: ZoomPanModifier,
+  [ZoomPanModifierType.MouseWheelZoomPan]: MouseWheelZoomModifier,
+  [ZoomPanModifierType.XAxisDrag]: XAxisDragModifier,
+  [ZoomPanModifierType.YAxisDrag]: YAxisDragModifier,
+  [ZoomPanModifierType.RubberBandXyZoom]: RubberBandXyZoomModifier,
+  [ZoomPanModifierType.ZoomExtents]: ZoomExtentsModifier,
+};
+
 export type DrawFunction = (
   surface: SciChartSurface,
   wasmContext: TSciChart
 ) => { surface: SciChartSurface; wasmContext: TSciChart };
 
-interface IBob {
+interface IBob<T> {
   build: () => DrawFunction;
   addAxis: (
     direction: AxisDirection,
-    type: AxisType,
+    valueType: AxisType,
     options?: AxisOptions
-  ) => IBob;
+  ) => T;
   addLine: (
     data: IXyDataSeriesOptions[],
     line?: IFastLineRenderableSeriesOptions
-  ) => IBob;
+  ) => T;
+  addAnnotation: (
+    annotationType: AnnotationType,
+    options?: AnnotationOptions
+  ) => T;
+  addZoomPanModifier: (
+    zoomPanModifierType: ZoomPanModifierType,
+    options?: ZoomPanModifierOptions
+  ) => T;
+  addRolloverModifier: (options?: IRolloverModifierOptions) => T;
+  addCursorModifier: (options?: ICursorModifierOptions) => T;
+  addLegendModifier: (options?: ILegendModifierOptions) => T;
 }
 
-class Bob2d implements IBob {
+class Bob2d implements IBob<Bob2d> {
   private draw: DrawFunction[] = [];
 
-  public static new(): IBob {
+  public static new(): Bob2d {
     return new Bob2d();
   }
 
   public build(): DrawFunction {
     return (surface: SciChartSurface, wasmContext: TSciChart) => {
       return this.draw.reduce(
-        (acc, buildFunction) => {
-          return buildFunction(acc.surface, acc.wasmContext);
-        },
+        (acc, buildFunction) => buildFunction(acc.surface, acc.wasmContext),
         { surface, wasmContext }
       );
     };
@@ -77,23 +183,7 @@ class Bob2d implements IBob {
     options: AxisOptions = {}
   ): Bob2d {
     this.draw.push((surface, wasmContext) => {
-      let newAxis;
-      switch (valueType) {
-        case AxisType.Numeric:
-          newAxis = new NumericAxis(wasmContext, options);
-          break;
-        case AxisType.DateTimeNumeric:
-          newAxis = new DateTimeNumericAxis(wasmContext, options);
-          break;
-        case AxisType.Category:
-          newAxis = new CategoryAxis(wasmContext, options);
-          break;
-        case AxisType.LogarithmicAxis:
-          newAxis = new LogarithmicAxis(wasmContext, options);
-          break;
-        default:
-          throw new Error("Unknown axis type");
-      }
+      const newAxis = new AxisMap[valueType](wasmContext, options);
       switch (direction) {
         case AxisDirection.X:
           surface.xAxes.add(newAxis);
@@ -142,6 +232,54 @@ class Bob2d implements IBob {
       return { surface, wasmContext };
     });
 
+    return this;
+  }
+
+  public addAnnotation(
+    annotationType: AnnotationType,
+    options: AnnotationOptions = {}
+  ): Bob2d {
+    this.draw.push((surface, wasmContext) => {
+      surface.annotations.add(new AnnotationMap[annotationType](options));
+      return { surface, wasmContext };
+    });
+
+    return this;
+  }
+
+  public addZoomPanModifier(
+    modifierType: ZoomPanModifierType,
+    options: ZoomPanModifierOptions = {}
+  ): Bob2d {
+    this.draw.push((surface, wasmContext) => {
+      surface.chartModifiers.add(new ZoomPanModifierMap[modifierType](options));
+      return { surface, wasmContext };
+    });
+
+    return this;
+  }
+
+  public addRolloverModifier(options: IRolloverModifierOptions = {}): Bob2d {
+    this.draw.push((surface, wasmContext) => {
+      surface.chartModifiers.add(new RolloverModifier(options));
+      return { surface, wasmContext };
+    });
+    return this;
+  }
+
+  public addCursorModifier(options: ICursorModifierOptions = {}): Bob2d {
+    this.draw.push((surface, wasmContext) => {
+      surface.chartModifiers.add(new CursorModifier(options));
+      return { surface, wasmContext };
+    });
+    return this;
+  }
+
+  public addLegendModifier(options: ILegendModifierOptions = {}): Bob2d {
+    this.draw.push((surface, wasmContext) => {
+      surface.chartModifiers.add(new LegendModifier(options));
+      return { surface, wasmContext };
+    });
     return this;
   }
 }

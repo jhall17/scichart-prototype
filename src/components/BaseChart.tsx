@@ -1,21 +1,25 @@
 "use client";
 import { useRef, useEffect, useState } from "react";
-import { SciChartSurface } from "scichart";
+import { I2DSurfaceOptions, SciChartSurface } from "scichart";
 import { DrawFunction } from "./Bob";
 
 type BaseChartProps = {
   draw: DrawFunction;
+  surfaceOptions?: I2DSurfaceOptions;
   divStyle?: React.HTMLProps<HTMLDivElement>;
 };
 
-const BaseChart = ({ draw, divStyle }: BaseChartProps) => {
+const BaseChart = ({ draw, surfaceOptions, divStyle }: BaseChartProps) => {
   const [curSurface, setCurSurface] = useState<SciChartSurface>();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     (async () => {
       // TODO: how do we handle this default
-      const res = await SciChartSurface.create(ref?.current ?? "");
+      const res = await SciChartSurface.create(
+        ref?.current ?? "",
+        surfaceOptions
+      );
       const { surface } = draw(res.sciChartSurface, res.wasmContext);
       setCurSurface(surface);
     })();
