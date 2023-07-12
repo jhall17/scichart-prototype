@@ -23,7 +23,9 @@ const BaseChart = ({ draw, divStyle }: BaseChartProps) => {
     return () => curSurface?.delete();
   }, []);
 
-  return <div ref={ref} style={divStyle} />;
+  return (
+    <div ref={ref} style={{ height: "100%", width: "100%", ...divStyle }} />
+  );
 };
 
 export default BaseChart;

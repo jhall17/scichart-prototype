@@ -2,6 +2,7 @@
 import BaseChart from "./BaseChart";
 import Bob2d, { AxisDirection, AxisType } from "./Bob";
 import rawData from "../data/alvinDay4Signals.json";
+// import rawData from "../data/alvinMonth4Signals.json";
 import { IXyDataSeriesOptions } from "scichart";
 
 const RenderedChart = () => {
@@ -22,7 +23,7 @@ const RenderedChart = () => {
     .addLine(dataSeries)
     .build();
 
-  return <BaseChart divStyle={{ height: "100%", width: "100%" }} draw={draw} />;
+  return <BaseChart draw={draw} />;
 };
 
 export default RenderedChart;
