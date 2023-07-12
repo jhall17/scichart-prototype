@@ -6,7 +6,6 @@ const nextConfig = {
   reactStrictMode: false,
   experimental: {
     appDir: true,
-    serverActions: true,
   },
   webpack: (config, { isServer, dev }) => {
     const wasmDest = "../.next/static/chunks/app";
