@@ -50,7 +50,7 @@ const RenderedChart = () => {
     .addZoomPanModifier(ZoomPanModifierType.ZoomPan)
     .addCursorModifier({ showTooltip: true, hitTestRadius: 2 })
     .addLegendModifier({
-      showCheckboxes: false,
+      showCheckboxes: true,
       showSeriesMarkers: true,
       showLegend: true,
     })
