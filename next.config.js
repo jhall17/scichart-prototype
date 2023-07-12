@@ -1,15 +1,15 @@
-/** @type {import('next').NextConfig} */
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 
 const nextConfig = {
   basePath: "",
-  reactStrictMode: true,
+  reactStrictMode: false,
   experimental: {
     appDir: true,
+    serverActions: true,
   },
-  webpack: (config) => {
-    const wasmDest = "static/chunks/pages";
+  webpack: (config, { isServer, dev }) => {
+    const wasmDest = "../.next/static/chunks/app";
     config.plugins.push(
       new CopyPlugin({
         patterns: [
@@ -24,10 +24,9 @@ const nextConfig = {
     config.experiments = {
       ...config.experiments,
       asyncWebAssembly: true,
-      syncWebAssembly: true,
     };
-    config.output.webassemblyModuleFilename =
-      "static/chunks/pages/scichart2d.wasm";
+    // config.output.webassemblyModuleFilename =
+    //   "static/chunks/pages/scichart2d.wasm";
     // config.devServer = {
     //   ...config.devServer,
     //   devMiddleware: { writeToDisk: true },

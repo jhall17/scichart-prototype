@@ -62,7 +62,9 @@ class Bob2d implements IBob {
   public build(): DrawFunction {
     return (surface: SciChartSurface, wasmContext: TSciChart) => {
       return this.draw.reduce(
-        (acc, buildFunction) => buildFunction(acc.surface, acc.wasmContext),
+        (acc, buildFunction) => {
+          return buildFunction(acc.surface, acc.wasmContext);
+        },
         { surface, wasmContext }
       );
     };

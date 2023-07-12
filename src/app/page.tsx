@@ -1,5 +1,5 @@
-"use client";
 import RenderedChart from "../components/RenderedChart";
+import NoSsr from "../components/NoSsr";
 
 export default function Home() {
   return (
@@ -13,7 +13,9 @@ export default function Home() {
         height: "100vh",
       }}
     >
-      <RenderedChart />
+      <NoSsr>
+        <RenderedChart />
+      </NoSsr>
     </div>
   );
 }

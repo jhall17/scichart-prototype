@@ -22,7 +22,7 @@ const RenderedChart = () => {
     .addLine(dataSeries)
     .build();
 
-  return <BaseChart draw={draw} />;
+  return <BaseChart divStyle={{ height: "100%", width: "100%" }} draw={draw} />;
 };
 
 export default RenderedChart;

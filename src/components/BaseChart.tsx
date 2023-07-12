@@ -5,9 +5,10 @@ import { DrawFunction } from "./Bob";
 
 type BaseChartProps = {
   draw: DrawFunction;
+  divStyle?: React.HTMLProps<HTMLDivElement>;
 };
 
-const BaseChart = ({ draw }: BaseChartProps) => {
+const BaseChart = ({ draw, divStyle }: BaseChartProps) => {
   const [curSurface, setCurSurface] = useState<SciChartSurface>();
   const ref = useRef<HTMLDivElement>(null);
 
@@ -22,7 +23,7 @@ const BaseChart = ({ draw }: BaseChartProps) => {
     return () => curSurface?.delete();
   }, []);
 
-  return <div ref={ref} />;
+  return <div ref={ref} style={divStyle} />;
 };
 
 export default BaseChart;
