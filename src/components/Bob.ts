@@ -184,14 +184,7 @@ class Bob2d implements IBob<Bob2d> {
   ): Bob2d {
     this.draw.push((surface, wasmContext) => {
       const newAxis = new AxisMap[valueType](wasmContext, options);
-      switch (direction) {
-        case AxisDirection.X:
-          surface.xAxes.add(newAxis);
-          break;
-        case AxisDirection.Y:
-          surface.yAxes.add(newAxis);
-          break;
-      }
+      direction === AxisDirection.X ? surface.xAxes.add(newAxis) : surface.yAxes.add(newAxis)
 
       return { surface, wasmContext };
     });
