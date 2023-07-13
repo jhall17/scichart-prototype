@@ -1,4 +1,3 @@
-"use client";
 import { useRef, useEffect, useState } from "react";
 import { I2DSurfaceOptions, SciChartSurface } from "scichart";
 import { DrawFunction } from "./Bob";
@@ -25,7 +24,7 @@ const BaseChart = ({ draw, surfaceOptions, divStyle }: BaseChartProps) => {
     })();
 
     return () => curSurface?.delete();
-  }, []);
+  }, [draw, surfaceOptions]);
 
   return (
     <div ref={ref} style={{ height: "100%", width: "100%", ...divStyle }} />

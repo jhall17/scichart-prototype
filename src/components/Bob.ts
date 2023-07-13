@@ -136,44 +136,78 @@ export type DrawFunction = (
   wasmContext: TSciChart
 ) => { surface: SciChartSurface; wasmContext: TSciChart };
 
+export type BuildFunction<T> = (...x: any[]) => IBob<T>;
+
+// interface for Bob the (chart) Builder
 interface IBob<T> {
   build: () => DrawFunction;
-  addAxis: (
-    direction: AxisDirection,
-    valueType: AxisType,
-    options?: AxisOptions
-  ) => T;
-  addLine: (
-    data: IXyDataSeriesOptions[],
-    line?: IFastLineRenderableSeriesOptions
-  ) => T;
-  addAnnotation: (
-    annotationType: AnnotationType,
-    options?: AnnotationOptions
-  ) => T;
-  addZoomPanModifier: (
-    zoomPanModifierType: ZoomPanModifierType,
-    options?: ZoomPanModifierOptions
-  ) => T;
-  addRolloverModifier: (options?: IRolloverModifierOptions) => T;
-  addCursorModifier: (options?: ICursorModifierOptions) => T;
-  addLegendModifier: (options?: ILegendModifierOptions) => T;
+  addAxis: BuildFunction<T>;
+  addLine: BuildFunction<T>;
+  addAnnotation: BuildFunction<T>;
+  addZoomPanModifier: BuildFunction<T>;
+  addRolloverModifier: BuildFunction<T>;
+  addCursorModifier: BuildFunction<T>;
+  addLegendModifier: BuildFunction<T>;
 }
 
+// implementation of Bob the (chart) Builder
 class Bob2d implements IBob<Bob2d> {
   private draw: DrawFunction[] = [];
+  private drawPointer: number = -1;
+  private surfaceCtx?: { surface: SciChartSurface; wasmContext: TSciChart };
 
+  // creates a new bob, "new Bob2d()" should not be called directly by consumer
   public static new(): Bob2d {
     return new Bob2d();
   }
 
+  // creates a draw function that can be passed to BaseChart to render the
+  // chart Bob has built
   public build(): DrawFunction {
     return (surface: SciChartSurface, wasmContext: TSciChart) => {
+      this.drawPointer = -1;
+      this.surfaceCtx = { surface, wasmContext };
       return this.draw.reduce(
-        (acc, buildFunction) => buildFunction(acc.surface, acc.wasmContext),
+        (acc, buildFunction, curIndex) => {
+          this.drawPointer = curIndex;
+          if (acc.surface === undefined) {
+            console.warn("Bob2d: failed to draw, surface is undefined");
+            return { surface, wasmContext };
+          }
+          return buildFunction(acc.surface, acc.wasmContext);
+        },
         { surface, wasmContext }
       );
     };
+  }
+
+  // if the chart has been built previously and is already on the page,
+  // calling update() instead of build() will apply changes directly to your
+  // current chart without rerender
+  public update(): undefined {
+    if (this.surfaceCtx === undefined) {
+      console.warn(
+        "Bob2d: surfaceCtx is undefined, was update called before build?"
+      );
+      return;
+    }
+    if (this.draw.length <= this.drawPointer + 1) {
+      console.warn(
+        "Bob2d: drawPointer already at end of array - did you add more functions since the last update?"
+      );
+      return;
+    }
+    this.draw.forEach((buildFunction, curIndex) => {
+      if (curIndex <= this.drawPointer) {
+        return;
+      }
+
+      this.drawPointer = curIndex;
+
+      this.surfaceCtx &&
+        buildFunction(this.surfaceCtx.surface, this.surfaceCtx.wasmContext);
+      return;
+    });
   }
 
   // TODO: compare removeAxis vs fresh generation
@@ -184,7 +218,9 @@ class Bob2d implements IBob<Bob2d> {
   ): Bob2d {
     this.draw.push((surface, wasmContext) => {
       const newAxis = new AxisMap[valueType](wasmContext, options);
-      direction === AxisDirection.X ? surface.xAxes.add(newAxis) : surface.yAxes.add(newAxis)
+      direction === AxisDirection.X
+        ? surface.xAxes.add(newAxis)
+        : surface.yAxes.add(newAxis);
 
       return { surface, wasmContext };
     });
