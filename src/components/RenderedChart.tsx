@@ -1,12 +1,12 @@
 "use client";
-import BaseChart from "./BaseChart";
-import Bob2d, {
+import BaseChart, {
+  Bob2d,
   AnnotationType,
   AxisDirection,
   AxisType,
   DrawFunction,
   ZoomPanModifierType,
-} from "./Bob";
+} from "./Chart";
 // import rawData from "../data/alvinDay4Signals.json";
 // import rawData from "../data/alvinMonth4Signals.json";
 // import rawData from "../data/alvinDayDemo.json";
@@ -15,7 +15,6 @@ import {
   AUTO_COLOR,
   IXyDataSeriesOptions,
   NumberRange,
-  ScaleAnimation,
   SciChartJSDarkv2Theme,
   SciChartSurface,
   TSciChart,

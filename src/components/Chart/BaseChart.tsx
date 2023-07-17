@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import { I2DSurfaceOptions, SciChartSurface } from "scichart";
-import { DrawFunction } from "./Bob";
+import { DrawFunction } from "./Bob2d";
 
 type BaseChartProps = {
   draw: DrawFunction;
