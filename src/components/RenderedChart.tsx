@@ -7,12 +7,15 @@ import Bob2d, {
   DrawFunction,
   ZoomPanModifierType,
 } from "./Bob";
-import rawData from "../data/alvinDay4Signals.json";
+// import rawData from "../data/alvinDay4Signals.json";
 // import rawData from "../data/alvinMonth4Signals.json";
+// import rawData from "../data/alvinDayDemo.json";
+import rawData from "../data/alvinMonthDemo.json";
 import {
   AUTO_COLOR,
   IXyDataSeriesOptions,
   NumberRange,
+  ScaleAnimation,
   SciChartJSDarkv2Theme,
   SciChartSurface,
   TSciChart,
@@ -56,7 +59,9 @@ const RenderedChart = () => {
         ),
       })
       .addAxis(AxisDirection.Y, AxisType.Numeric)
-      .addLine(dataSeries, { stroke: AUTO_COLOR })
+      .addLine(dataSeries, {
+        stroke: AUTO_COLOR,
+      })
       .addAnnotation(AnnotationType.Box, {
         fill: "rgba(255, 0, 0, 0.3)",
         stroke: "rgba(255, 0, 0, 0.3)",
@@ -68,7 +73,8 @@ const RenderedChart = () => {
       })
       .addZoomPanModifier(ZoomPanModifierType.MouseWheelZoomPan)
       .addZoomPanModifier(ZoomPanModifierType.ZoomPan)
-      .addCursorModifier({ showTooltip: true, hitTestRadius: 2 })
+      .addCursorModifier({ showTooltip: false, hitTestRadius: 2 })
+      .addRolloverModifier()
       .addLegendModifier({
         showCheckboxes: true,
         showSeriesMarkers: true,
