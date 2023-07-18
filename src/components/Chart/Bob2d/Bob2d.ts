@@ -11,6 +11,7 @@ import {
   RolloverModifier,
   CursorModifier,
   LegendModifier,
+  SciChartOverview,
 } from "scichart";
 import { DrawFunction, IBob } from "./bob.interface";
 import {
@@ -185,6 +186,14 @@ class Bob2d implements IBob<Bob2d> {
   public addLegendModifier(options: ILegendModifierOptions = {}): Bob2d {
     this.draw.push((surface, wasmContext) => {
       surface.chartModifiers.add(new LegendModifier(options));
+      return { surface, wasmContext };
+    });
+    return this;
+  }
+
+  public addOverview(ref: HTMLDivElement): Bob2d {
+    this.draw.push((surface, wasmContext) => {
+      SciChartOverview.create(surface, ref);
       return { surface, wasmContext };
     });
     return this;

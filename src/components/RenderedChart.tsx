@@ -13,13 +13,21 @@ import BaseChart, {
 import rawData from "../data/alvinMonthDemo.json";
 import {
   AUTO_COLOR,
+  EAutoRange,
+  ELegendPlacement,
   IXyDataSeriesOptions,
   NumberRange,
+  NumberRangeAnimator,
   SciChartJSDarkv2Theme,
   SciChartSurface,
   TSciChart,
+  WaveAnimation,
+  easing,
 } from "scichart";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createCustomTheme } from "./Chart/chart.theme";
+import { darkTheme, lightTheme } from "@flexgen/storybook";
+import { uid } from "uid";
 
 let hasUpdated = false;
 
@@ -31,10 +39,9 @@ const RenderedChart = () => {
       wasmContext,
     })
   );
+  const overviewRef = useRef<HTMLDivElement>(null);
 
-  const theme = new SciChartJSDarkv2Theme();
-  theme.strokePalette = ["red", "yellow", "green", "blue"];
-  theme.fillPalette = ["blue", "green", "yellow", "red"];
+  const theme = createCustomTheme(darkTheme);
 
   const dataSeries: IXyDataSeriesOptions[] = Object.entries(rawData.lines).map(
     ([name, yVals]) => ({
@@ -47,18 +54,37 @@ const RenderedChart = () => {
     })
   );
 
-  const minDate = new Date("2022-09-01T00:00:00.000Z");
-  const maxDate = new Date("2022-09-02T00:00:00.000Z");
+  const sept1 = new Date("2022-09-01T00:00:00.000Z");
+  const oct1 = new Date("2022-10-01T00:00:00.000Z");
 
   useEffect(() => {
     const newBob = Bob2d.new()
       .addAxis(AxisDirection.X, AxisType.DateTimeNumeric, {
         visibleRange: new NumberRange(
-          minDate.getTime() / 1000,
-          maxDate.getTime() / 1000
+          sept1.getTime() / 1000,
+          oct1.getTime() / 1000
         ),
+        visibleRangeLimit: new NumberRange(
+          sept1.getTime() / 1000,
+          oct1.getTime() / 1000
+        ),
+        axisBorder: {
+          borderTop: 1,
+          border: 10,
+          color: theme.axisBorder,
+        },
+        axisTitle: "Time",
+        drawMajorGridLines: false,
       })
-      .addAxis(AxisDirection.Y, AxisType.Numeric, {})
+      .addAxis(AxisDirection.Y, AxisType.Numeric, {
+        autoRange: EAutoRange.Always,
+        autoRangeAnimation: {
+          animateInitialRanging: false,
+          animateSubsequentRanging: true,
+          duration: 200,
+          easing: easing.linear,
+        },
+      })
       .addLine(dataSeries, {
         stroke: AUTO_COLOR,
       })
@@ -73,13 +99,15 @@ const RenderedChart = () => {
       })
       .addZoomPanModifier(ZoomPanModifierType.MouseWheelZoomPan)
       .addZoomPanModifier(ZoomPanModifierType.ZoomPan)
-      .addCursorModifier({ showTooltip: false, hitTestRadius: 2 })
+      // .addCursorModifier({ showTooltip: false, hitTestRadius: 2 })
       .addRolloverModifier()
       .addLegendModifier({
         showCheckboxes: true,
         showSeriesMarkers: true,
         showLegend: true,
+        placement: ELegendPlacement.TopRight,
       });
+    // .addOverview(overviewRef.current!);
 
     const firstDraw = newBob.build();
 
@@ -102,7 +130,25 @@ const RenderedChart = () => {
       }, 5000);
     })();
 
-  return <BaseChart draw={draw} surfaceOptions={{ theme }} />;
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        width: "100%",
+      }}
+    >
+      <BaseChart
+        divStyle={{ height: "90%" }}
+        draw={draw}
+        surfaceOptions={{ theme, title: "Test Chart" }}
+        overviewDiv={overviewRef?.current ?? undefined}
+      />
+      {/* I don't know why but we need any arbitrary ID for overview to render */}
+      <div ref={overviewRef} style={{ height: "10%" }} id={uid()} />
+    </div>
+  );
 };
 
 export default RenderedChart;
