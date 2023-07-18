@@ -20,4 +20,5 @@ export interface IBob<T> {
   addRolloverModifier: BuildFunction<T>;
   addCursorModifier: BuildFunction<T>;
   addLegendModifier: BuildFunction<T>;
+  addOverview: BuildFunction<T>;
 }

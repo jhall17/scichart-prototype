@@ -10,7 +10,6 @@ export function createCustomTheme(
 ): IThemeProvider {
   const customTheme: IThemeProvider = {
     ...new SciChartJsNavyTheme(),
-    // ...new SciChartJSLightTheme(),
     axisBorder: theme.fgd.text.primary,
     axisTitleColor: theme.fgd.text.primary,
     // annotationsGripsBackroundBrush: "white",

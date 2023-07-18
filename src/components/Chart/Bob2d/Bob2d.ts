@@ -27,8 +27,6 @@ import {
 } from "./bob2d.types";
 import { AnnotationMap, AxisMap, ZoomPanModifierMap } from "./bob2d.maps";
 
-// TODO: test - if we add to the builder, then rerender, does bob cleanup? e.g. add axis
-
 // implementation of Bob the (chart) Builder
 class Bob2d implements IBob<Bob2d> {
   private draw: DrawFunction[] = [];
@@ -89,7 +87,6 @@ class Bob2d implements IBob<Bob2d> {
     });
   }
 
-  // TODO: compare removeAxis vs fresh generation
   public addAxis(
     direction: AxisDirection,
     valueType: AxisType,
@@ -193,7 +190,9 @@ class Bob2d implements IBob<Bob2d> {
 
   public addOverview(ref: HTMLDivElement): Bob2d {
     this.draw.push((surface, wasmContext) => {
-      SciChartOverview.create(surface, ref);
+      SciChartOverview.create(surface, ref).then((res) =>
+        res.overviewSciChartSurface.applyTheme(surface.themeProvider)
+      );
       return { surface, wasmContext };
     });
     return this;

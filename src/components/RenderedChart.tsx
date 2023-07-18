@@ -17,11 +17,8 @@ import {
   ELegendPlacement,
   IXyDataSeriesOptions,
   NumberRange,
-  NumberRangeAnimator,
-  SciChartJSDarkv2Theme,
   SciChartSurface,
   TSciChart,
-  WaveAnimation,
   easing,
 } from "scichart";
 import { useEffect, useRef, useState } from "react";
@@ -106,8 +103,8 @@ const RenderedChart = () => {
         showSeriesMarkers: true,
         showLegend: true,
         placement: ELegendPlacement.TopRight,
-      });
-    // .addOverview(overviewRef.current!);
+      })
+      .addOverview(overviewRef.current!);
 
     const firstDraw = newBob.build();
 
@@ -124,7 +121,7 @@ const RenderedChart = () => {
           ?.addAnnotation(AnnotationType.Text, {
             text: "Hello World",
             x1: new Date("2022-09-01T06:00:00.000Z").getTime() / 1000,
-            y1: 20,
+            y1: 3.3,
           })
           .update();
       }, 5000);
@@ -143,7 +140,6 @@ const RenderedChart = () => {
         divStyle={{ height: "90%" }}
         draw={draw}
         surfaceOptions={{ theme, title: "Test Chart" }}
-        overviewDiv={overviewRef?.current ?? undefined}
       />
       {/* I don't know why but we need any arbitrary ID for overview to render */}
       <div ref={overviewRef} style={{ height: "10%" }} id={uid()} />
